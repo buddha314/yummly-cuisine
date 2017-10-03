@@ -1,0 +1,34 @@
+{ "recipes":
+[{
+    "id": 10259,
+    "cuisine": "greek",
+    "ingredients": [
+      "romaine lettuce",
+      "black olives",
+      "grape tomatoes",
+      "garlic",
+      "pepper",
+      "purple onion",
+      "seasoning",
+      "garbanzo beans",
+      "feta cheese crumbles"
+    ]
+  },
+  {
+    "id": 25693,
+    "cuisine": "southern_us",
+    "ingredients": [
+      "plain flour",
+      "ground pepper",
+      "salt",
+      "tomatoes",
+      "ground black pepper",
+      "thyme",
+      "eggs",
+      "green tomatoes",
+      "yellow corn meal",
+      "milk",
+      "vegetable oil"
+    ]
+  }
+]}
