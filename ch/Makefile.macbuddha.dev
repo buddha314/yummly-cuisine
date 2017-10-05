@@ -1,0 +1,5 @@
+NUMSUCH_HOME=/Users/buddha/github/buddha314/numsuch/src/
+DATA_FILE=/datasets/recipe-kaggle/train.json
+BLAS_HOME= /usr/local/Cellar/openblas/0.2.20
+FLAGS=
+include Makefile
