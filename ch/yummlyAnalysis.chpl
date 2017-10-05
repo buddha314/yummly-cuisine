@@ -9,11 +9,11 @@ module Yummly {
 
   var ingredients: domain(string),
       ingredientIds: [ingredients] int,
-      ings = {1..0},
-      D = {ings.dim(1),ings.dim(1)},
+      ings = {1..0};
+      //D: domain (2),
       //SD: sparse subdomain(D) dmapped CS(),
-      SD: sparse subdomain(D),
-      A: [SD] real;
+      //SD: sparse subdomain(D),
+      //A: [SD] real;
 
   record Recipe {
     var cuisine: string,
@@ -39,41 +39,42 @@ module Yummly {
 
   proc loadGraph(cookBook: CookBook) {
       var t:Timer;
+      var edges: list((int, int));
       t.start();
       writeln("loading graph");
       for recipe in cookBook.recipes {
-        //writeln("\t", recipe.cuisine);
-        for ingredient in recipe.ingredients {
-          if !ingredients.member(ingredient) {
-            ings = {1..ings.last + 1};
-            //writeln("D is now ", D);
-            ingredients.add(ingredient);
-            ingredientIds[ingredient] = ingredients.size;
-          }
-        }
         for ingredient_1 in recipe.ingredients {
+          if !ingredients.member(ingredient_1) {
+            ingredients.add(ingredient_1);
+            ingredientIds[ingredient_1] = ingredients.size;
+          }
           for ingredient_2 in recipe.ingredients {
-            //writeln(D);
-            var i = ingredientIds(ingredient_1);
-            var j = ingredientIds(ingredient_2);
-            if !SD.member((i,j)) && i != j {
-              //writeln("\tTrying to add to SD: (i,j) ", i, " ", j);
-              SD += (ingredientIds(ingredient_1), ingredientIds(ingredient_2));
-              A[i,j] = 1;
-            } else if i != j{
-              A[i,j] += 1;
-              //writeln("\tALREADY HAVE (i,j) ", i, " ", j);
+            if !ingredients.member(ingredient_2) {
+              ingredients.add(ingredient_2);
+              ingredientIds[ingredient_2] = ingredients.size;
             }
-            //writeln("SD shape: ", SD);
+            if ingredientIds[ingredient_1] != ingredientIds[ingredient_2] {
+              edges.append((ingredientIds[ingredient_1],ingredientIds[ingredient_2]));
+            }
           }
         }
       }
-      //writeln(SD);
+      var D: domain(2) = {1..ingredients.size, 1..ingredients.size};
+      var SD: sparse subdomain(D),
+          A: [SD] real;
+      for e in edges {
+        var i = e[1],
+            j = e[2];
+        if !SD.member((i,j)) {
+          SD += (i, j);
+          A[i,j] = 1;
+        } else {
+          A[i,j] += 1;
+        }
+      }
       t.stop();
       writeln("...time to load matrix: ", t.elapsed());
-      //var g = NumSuch.Graph.buildFromSparseMatrix(A, weighted=false, directed=false);
       var g = GraphUtils.buildFromSparseMatrix(A, weighted=false, directed=false);
-      //var g = buildFromSparseMatrix(A, weighted=false, directed=false);
   }
 
   proc main() {
