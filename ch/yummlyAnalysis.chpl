@@ -1,6 +1,6 @@
 module Yummly {
   use IO,
-      //LayoutCS,
+      LayoutCS,
       Time;
   //use NumSuch only;
   use NumSuch;
@@ -8,8 +8,7 @@ module Yummly {
   config const data: string;
 
   var ingredients: domain(string),
-      ingredientIds: [ingredients] int,
-      ings = {1..0};
+      ingredientIds: [ingredients] int;
       //D: domain (2),
       //SD: sparse subdomain(D) dmapped CS(),
       //SD: sparse subdomain(D),
@@ -60,7 +59,7 @@ module Yummly {
         }
       }
       var D: domain(2) = {1..ingredients.size, 1..ingredients.size};
-      var SD: sparse subdomain(D),
+      var SD: sparse subdomain(D) dmapped CS(),
           A: [SD] real;
       for e in edges {
         var i = e[1],
@@ -75,10 +74,11 @@ module Yummly {
       t.stop();
       writeln("...time to load matrix: ", t.elapsed());
       var g = GraphUtils.buildFromSparseMatrix(A, weighted=false, directed=false);
+      return g;
   }
 
   proc main() {
     var cookBook = loadTrainingData();
-    loadGraph(cookBook);
+    var g = loadGraph(cookBook);
   }
 }
