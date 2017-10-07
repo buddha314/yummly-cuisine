@@ -1,12 +1,15 @@
 module Yummly {
   use IO,
       LayoutCS,
+      Random,
       Time;
-  //use NumSuch only;
   use NumSuch;
 
+  config const output: string = "output.txt";
   config const data: string;
   config const v: bool = false;  // boolean for verbosity
+  config const p: real = 0.95; // random knockout probability
+
   record Recipe {
     var cuisine: string,
         id: int,
@@ -100,14 +103,39 @@ module Yummly {
       writeln("Number of ingredients: ", g.vertices);
       writeln("No, the actual number of ingredients: ", ingredients.size);
     }
-    for recipe in cookBook.recipes {
-      var cupboard: domain(string);
-      for ingredient in recipe.ingredients {
-        cupboard += ingredient;
+    try {
+      var ofile = open(output, iomode.cw).writer();
+      ofile.write("recipe_id\toriginal_size\tknockout_size\tcrystal_energy\tcrystal_size\n");
+      for recipe in cookBook.recipes {
+        var cupboard: domain(string);
+        var rands: [1..recipe.ingredients.size] real;
+        var i = 1;
+        fillRandom(rands);
+        for ingredient in recipe.ingredients {
+          if rands[i] < p {
+            cupboard += ingredient;
+            i += 1;
+          }
+        }
+        var tdom = testIngredients(g, ingredients, idToString, cupboard);
+        write("recipe id: ", recipe.id, " original size: ", recipe.ingredients.size
+          , " knockout size: ", cupboard.size
+        );
+        if cupboard.size > 1 {
+          var msb = GraphEntropy.minimalSubGraph(g, tdom);
+          writeln(" crystal energy: ", msb[1]
+          , " crystal size: ", msb[2].size);
+          ofile.write(
+            recipe.id + "\t" + recipe.ingredients.size
+            + "\t" + cupboard.size
+            + "\t" + msb[1] + "\t" + msb[2].size + "\n");
+        } else {
+          writeln(" ...skipping...");
+        }
       }
-      var tdom = testIngredients(g, ingredients, idToString, cupboard);
-      writeln("recipe id: ", recipe.id, " size: ", recipe.ingredients.size
-        , " crystal size: ", tdom.size);
+      ofile.close();
+    } catch {
+      halt("cannot open output file ", output);
     }
     /*
     var tdom = testIngredients(g, ingredients, idToString, cupboard);
