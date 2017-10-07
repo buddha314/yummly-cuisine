@@ -6,6 +6,7 @@ module Yummly {
   use NumSuch;
 
   config const data: string;
+  config const v: bool = false;  // boolean for verbosity
   record Recipe {
     var cuisine: string,
         id: int,
@@ -80,20 +81,35 @@ module Yummly {
   proc testIngredients(g:Graph, ingredients: [], idToString: [], cupboard: domain(string)) {
       var cupdom: sparse subdomain(g.Row.domain);
       for i in cupboard {
-        writeln("\tingredient ", i, " has id ", ingredients[i]);
+        if v {
+          writeln("\tingredient ", i, " has id ", ingredients[i]);
+        }
         cupdom += ingredients[i];
       }
       return cupdom;
   }
 
-  proc run(cupboard: domain(string)) {
+  //proc run(cupboard: domain(string)) {
+  proc run() {
     var cookBook = loadTrainingData();
     var r = loadGraph(cookBook);
     var g = r[1];
     var ingredients = r[2];
     var idToString = r[3];
-    writeln("Number of ingredients: ", g.vertices);
-    writeln("No, the actual number of ingredients: ", ingredients.size);
+    if v {
+      writeln("Number of ingredients: ", g.vertices);
+      writeln("No, the actual number of ingredients: ", ingredients.size);
+    }
+    for recipe in cookBook.recipes {
+      var cupboard: domain(string);
+      for ingredient in recipe.ingredients {
+        cupboard += ingredient;
+      }
+      var tdom = testIngredients(g, ingredients, idToString, cupboard);
+      writeln("recipe id: ", recipe.id, " size: ", recipe.ingredients.size
+        , " crystal size: ", tdom.size);
+    }
+    /*
     var tdom = testIngredients(g, ingredients, idToString, cupboard);
     writeln("IDs to test ", tdom);
     var msb = GraphEntropy.minimalSubGraph(g, tdom);
@@ -103,9 +119,11 @@ module Yummly {
     for n in nodes{
       writeln("Minimal ingredient: ", n, ": ", idToString[n]);
     }
+    */
   }
 
   proc main() {
-    var cookBook = loadTrainingData();
+    writeln("in main...");
+    run();
   }
 }
