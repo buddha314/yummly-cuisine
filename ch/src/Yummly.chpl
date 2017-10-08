@@ -77,7 +77,7 @@ module Yummly {
       }
       t.stop();
       writeln("...time to load matrix: ", t.elapsed());
-      var g = GraphUtils.buildFromSparseMatrix(A, weighted=false, directed=false);
+      const g = GraphUtils.buildFromSparseMatrix(A, weighted=false, directed=false);
       return (g, ingredients, idToString);
   }
 
@@ -96,7 +96,7 @@ module Yummly {
   proc run() {
     var cookBook = loadTrainingData();
     var r = loadGraph(cookBook);
-    var g = r[1];
+    const g = r[1];
     var ingredients = r[2];
     var idToString = r[3];
     if v {
@@ -104,9 +104,11 @@ module Yummly {
       writeln("No, the actual number of ingredients: ", ingredients.size);
     }
     try {
+      var t2: Timer;
+      t2.start();
       var ofile = open(output, iomode.cw).writer();
       ofile.write("recipe_id\toriginal_size\tknockout_size\tcrystal_energy\tcrystal_size\n");
-      for recipe in cookBook.recipes {
+      coforall recipe in cookBook.recipes {
         var cupboard: domain(string);
         var rands: [1..recipe.ingredients.size] real;
         var i = 1;
@@ -134,6 +136,8 @@ module Yummly {
         }
       }
       ofile.close();
+      t2.stop();
+      writeln("  ...time to build crystals: ", t2.elapsed());
     } catch {
       halt("cannot open output file ", output);
     }
