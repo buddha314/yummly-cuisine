@@ -1,4 +1,6 @@
-NUMSUCH_HOME=/Users/buddha/github/buddha314/numsuch/src/
-DATA_FILE=/datasets/recipe-kaggle/train.json
-BLAS_HOME= /usr/local/Cellar/openblas/0.2.20
+NUMSUCH_HOME=/home/buddha314/numsuch/src
+DATA_FILE=/home/buddha314/datasets/yummly/train.json
+BLAS_HOME= /opt/OpenBlas
+OUTPUT_FILE=output.txt
+FLAGS=--fast
 include Makefile
