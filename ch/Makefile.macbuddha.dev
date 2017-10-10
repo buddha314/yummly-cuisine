@@ -2,6 +2,6 @@ NUMSUCH_HOME=/Users/buddha/github/buddha314/numsuch/src/
 #DATA_FILE=/datasets/recipe-kaggle/train.json
 DATA_FILE=test/data/train.small.json
 BLAS_HOME= /usr/local/Cellar/openblas/0.2.20
-FLAGS=--fast
-OUTPUT_FILE=output.txt
+FLAGS=
+OUTPUT_FILE=output_dev.txt
 include Makefile

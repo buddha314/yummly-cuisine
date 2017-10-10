@@ -35,9 +35,10 @@ module Yummly {
   proc loadGraph(cookBook: CookBook) {
       var idToString : [1..0] string,
           ingDom : domain(string),
-          ingredients : [ingDom] int;
-      var t:Timer;
-      var edges: list((int, int));
+          ingredients : [ingDom] int,
+          t:Timer,
+          edges: list((int, int));
+      
       t.start();
       writeln("loading graph");
       for recipe in cookBook.recipes {
