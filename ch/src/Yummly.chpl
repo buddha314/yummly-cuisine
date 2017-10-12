@@ -20,28 +20,35 @@ module Yummly {
   }
 
 
-  proc loadTrainingData() {
-    var cookBook = new CookBook();
+  /*
+  Takes a JSON file and loads it into an array of Recipes
+   */
+  proc loadTrainingData(infile: string) {
+    var cookBook = new CookBook();  // discarded at the end
+    var recipeList: list(Recipe);
     try {
-      var f = open(data, iomode.r);
+      var f = open(infile, iomode.r);
       var r = f.reader();
       r.readf("%jt\n", cookBook);
     } catch {
       halt();
     }
-    return cookBook;
+    var recipeArray = for recipe in cookBook.recipes do recipe;
+    return recipeArray;
   }
 
-  proc loadGraph(cookBook: CookBook) {
+  //proc loadGraph(cookBook: CookBook) {
+  proc loadGraph(recipeArray: []) {
       var idToString : [1..0] string,
           ingDom : domain(string),
           ingredients : [ingDom] int,
           t:Timer,
           edges: list((int, int));
-      
+
       t.start();
       writeln("loading graph");
-      for recipe in cookBook.recipes {
+      //for recipe in cookBook.recipes {
+      for recipe in recipeArray {
         for ingredient_1 in recipe.ingredients {
           if ingDom.member(ingredient_1) == false {
             idToString.push_back(ingredient_1);
@@ -95,7 +102,7 @@ module Yummly {
 
   //proc run(cupboard: domain(string)) {
   proc run() {
-    var cookBook = loadTrainingData();
+    var cookBook = loadTrainingData(data);
     var r = loadGraph(cookBook);
     const g = r[1];
     var ingredients = r[2];
@@ -142,17 +149,6 @@ module Yummly {
     } catch {
       halt("cannot open output file ", output);
     }
-    /*
-    var tdom = testIngredients(g, ingredients, idToString, cupboard);
-    writeln("IDs to test ", tdom);
-    var msb = GraphEntropy.minimalSubGraph(g, tdom);
-    writeln("Minimal subgraph: ", msb);
-    var energy = msb[1];
-    var nodes = msb[2];
-    for n in nodes{
-      writeln("Minimal ingredient: ", n, ": ", idToString[n]);
-    }
-    */
   }
 
   proc main() {
