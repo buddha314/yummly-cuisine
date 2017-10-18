@@ -7,8 +7,8 @@ module Yummly {
 
   config const output: string = "output.txt";
   config const data: string;
-  config const v: bool = false;  // boolean for verbosity
   config const p: real = 0.95; // random knockout probability
+  config const e: real = 0.95; // degrees of ecdf > e get ignored
 
   record Recipe {
     var cuisine: string,
@@ -41,7 +41,9 @@ module Yummly {
   proc loadGraph(recipeArray: []) {
       var idToString : [1..0] string,
           ingDom : domain(string),
-          ingredients : [ingDom] int,
+          ingredients : domain(string),
+          //ingredients : [ingDom] int,
+          ingredientIds: [ingredients] int,
           t:Timer,
           edges: list((int, int));
 
@@ -50,22 +52,36 @@ module Yummly {
       //for recipe in cookBook.recipes {
       for recipe in recipeArray {
         for ingredient_1 in recipe.ingredients {
-          if ingDom.member(ingredient_1) == false {
-            idToString.push_back(ingredient_1);
-            const ID = idToString.domain.last;
+          //if ingDom.member(ingredient_1) == false {
+          if ingredients.member(ingredient_1) == false {
+            ingredients.add(ingredient_1);
             ingDom.add(ingredient_1);
-            ingredients[ingredient_1] = ID;
+            const ID = ingredients.size;
+            //const ID = ingredientIds.last+1;
+            ingredientIds[ingredient_1] = ID;
+            //idToString.push_back(ingredient_1);
+            //const ID = idToString.domain.last;
+            //ingredients[ingredient_1] = ID;
           }
           for ingredient_2 in recipe.ingredients {
-            if ingDom.member(ingredient_2) == false {
+            //if ingDom.member(ingredient_2) == false {
+            if ingredients.member(ingredient_2) == false {
+              ingredients.add(ingredient_2);
+              const ID = ingredients.size;
+              //const ID = ingredientIds.last+1;
+              ingDom.add(ingredient_2);
+              ingredientIds[ingredient_2] = ID;
+
+              /*
               idToString.push_back(ingredient_2);
               const ID = idToString.domain.last;
               ingDom.add(ingredient_2);
               ingredients[ingredient_2] = ID;
+               */
             }
 
-            if ingredients[ingredient_1] != ingredients[ingredient_2] {
-              edges.append((ingredients[ingredient_1], ingredients[ingredient_2]));
+            if ingredientIds[ingredient_1] != ingredientIds[ingredient_2] {
+              edges.append((ingredientIds[ingredient_1], ingredientIds[ingredient_2]));
             }
           }
         }
@@ -86,15 +102,12 @@ module Yummly {
       t.stop();
       writeln("...time to load matrix: ", t.elapsed());
       const g = GraphUtils.buildFromSparseMatrix(A, weighted=false, directed=false);
-      return (g, ingredients, idToString);
+      return (g, ingredients, idToString, ingredientIds);
   }
 
   proc testIngredients(g:Graph, ingredients: [], idToString: [], cupboard: domain(string)) {
       var cupdom: sparse subdomain(g.Row.domain);
       for i in cupboard {
-        if v {
-          writeln("\tingredient ", i, " has id ", ingredients[i]);
-        }
         cupdom += ingredients[i];
       }
       return cupdom;
@@ -103,51 +116,39 @@ module Yummly {
   //proc run(cupboard: domain(string)) {
   proc run() {
     var cookBook = loadTrainingData(data);
-    var r = loadGraph(cookBook);
-    const g = r[1];
-    var ingredients = r[2];
-    var idToString = r[3];
-    if v {
-      writeln("Number of ingredients: ", g.vertices);
-      writeln("No, the actual number of ingredients: ", ingredients.size);
-    }
-    try {
-      var t2: Timer;
-      t2.start();
-      var ofile = open(output, iomode.cw).writer();
-      ofile.write("recipe_id\toriginal_size\tknockout_size\tcrystal_energy\tcrystal_size\n");
-      coforall recipe in cookBook.recipes {
-        var cupboard: domain(string);
-        var rands: [1..recipe.ingredients.size] real;
-        var i = 1;
-        fillRandom(rands);
-        for ingredient in recipe.ingredients {
-          if rands[i] < p {
-            cupboard += ingredient;
-            i += 1;
-          }
-        }
-        var tdom = testIngredients(g, ingredients, idToString, cupboard);
-        write("recipe id: ", recipe.id, " original size: ", recipe.ingredients.size
-          , " knockout size: ", cupboard.size
-        );
-        if cupboard.size > 1 {
-          var msb = GraphEntropy.minimalSubGraph(g, tdom);
-          writeln(" crystal energy: ", msb[1]
-          , " crystal size: ", msb[2].size);
-          ofile.write(
-            recipe.id + "\t" + recipe.ingredients.size
-            + "\t" + cupboard.size
-            + "\t" + msb[1] + "\t" + msb[2].size + "\n");
-        } else {
-          writeln(" ...skipping...");
-        }
+    const (G, ingredients, idToString) = loadGraph(cookBook);
+    const ecdf = new ECDF(G.degree());
+
+    var t2: Timer;
+    t2.start();
+    var ofile = try! open(output, iomode.cw).writer();
+    try! ofile.write("recipe_id\toriginal_size\tknockout_size\tcrystal_energy\tcrystal_size\n");
+    forall recipe in cookBook {
+      var cupboard: domain(string);
+      for ingredient in recipe.ingredients {
+          cupboard += ingredient;
       }
-      ofile.close();
-      t2.stop();
+      var tdom = testIngredients(G, ingredients, idToString, cupboard);
+
+      write("recipe id: ", recipe.id, " original size: ", recipe.ingredients.size
+        , " knockout size: ", cupboard.size
+      );
+      if cupboard.size > 1 {
+        var msb = GraphEntropy.minimalSubGraph(G, tdom);
+        writeln(" crystal energy: ", msb[1]
+        , " crystal size: ", msb[2].size);
+        try! ofile.write(
+          recipe.id + "\t" + recipe.ingredients.size
+          + "\t" + cupboard.size
+          + "\t" + msb[1] + "\t" + msb[2].size + "\n");
+      } else {
+        writeln(" ...skipping...");
+      }
+    }
+    try! ofile.close();
+    t2.stop();
+    if v {
       writeln("  ...time to build crystals: ", t2.elapsed());
-    } catch {
-      halt("cannot open output file ", output);
     }
   }
 
