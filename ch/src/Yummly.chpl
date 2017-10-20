@@ -40,10 +40,12 @@ module Yummly {
   //proc loadGraph(cookBook: CookBook) {
   proc loadGraph(recipeArray: []) {
       var idToString : [1..0] string,
+          vertices: domain(1)= {1..0},
           ingDom : domain(string),
-          ingredients : domain(string),
+          //ingredients : domain(string),
+          ingredients : [vertices] string,
           //ingredients : [ingDom] int,
-          ingredientIds: [ingredients] int,
+          ingredientIds: [vertices] int,
           t:Timer,
           edges: list((int, int));
 
@@ -53,36 +55,51 @@ module Yummly {
       for recipe in recipeArray {
         for ingredient_1 in recipe.ingredients {
           //if ingDom.member(ingredient_1) == false {
-          if ingredients.member(ingredient_1) == false {
-            ingredients.add(ingredient_1);
-            ingDom.add(ingredient_1);
-            const ID = ingredients.size;
+          //if ingredients.member(ingredient_1) == false {
+          if ingredients.find(ingredient_1)(1) == false {
+            vertices = {1..vertices.size+1};
+            const ID = vertices.size;
+            ingredients[ID] = ingredient_1;
+
+
+            //ingredients.add(ingredient_1);
+            //ingDom.add(ingredient_1);
             //const ID = ingredientIds.last+1;
-            ingredientIds[ingredient_1] = ID;
+            //ingredientIds[ingredient_1] = ID;
             //idToString.push_back(ingredient_1);
             //const ID = idToString.domain.last;
             //ingredients[ingredient_1] = ID;
           }
           for ingredient_2 in recipe.ingredients {
             //if ingDom.member(ingredient_2) == false {
-            if ingredients.member(ingredient_2) == false {
-              ingredients.add(ingredient_2);
-              const ID = ingredients.size;
+            //if ingredients.member(ingredient_2) == false {
+            if ingredients.find(ingredient_2)(1) == false {
+              vertices = {1..vertices.size+1};
+              const ID = vertices.size;
+              ingredients[ID] = (ingredient_2);
+
               //const ID = ingredientIds.last+1;
-              ingDom.add(ingredient_2);
-              ingredientIds[ingredient_2] = ID;
+              //ingDom.add(ingredient_2);
+              //ingredientIds[ingredient_2] = ID;
+              //idToString.push_back(ingredient_2);
 
               /*
-              idToString.push_back(ingredient_2);
               const ID = idToString.domain.last;
               ingDom.add(ingredient_2);
               ingredients[ingredient_2] = ID;
                */
             }
 
-            if ingredientIds[ingredient_1] != ingredientIds[ingredient_2] {
-              edges.append((ingredientIds[ingredient_1], ingredientIds[ingredient_2]));
+            var (i,j) = (ingredients.find(ingredient_1)(2), ingredients.find(ingredient_2)(2));
+            if i != j {
+              edges.append((i,j));
             }
+            /*
+            if ingredientIds[ingredient_1] != ingredientIds[ingredient_2] {
+              //edges.append((ingredientIds[ingredient_1], ingredientIds[ingredient_2]));
+              edges.append((ingredientsfind(ingredient_1)(2), ingredientsfind(ingredient_2)(2));
+            }
+            */
           }
         }
       }
@@ -101,7 +118,8 @@ module Yummly {
       }
       t.stop();
       writeln("...time to load matrix: ", t.elapsed());
-      const g = GraphUtils.buildFromSparseMatrix(A, weighted=false, directed=false);
+      const g = GraphUtils.buildFromSparseMatrix(A, weighted=false
+        , directed=false, names=ingredients);
       return (g, ingredients, idToString, ingredientIds);
   }
 
