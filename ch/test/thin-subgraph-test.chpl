@@ -31,8 +31,6 @@ forall recipe in cookBook {
   for ingredient in recipe.ingredients do
     if subG.names().find(ingredient)(1) then crystal.originalElements.push_back(ingredient);
 
-  //writeln("crystal.originalElements: ", crystal.originalElements);
-
   var tdom: sparse subdomain(subG.vertices);
   for ing in crystal.originalElements do
     tdom += subG.names().find(ing)(2);
@@ -47,9 +45,15 @@ forall recipe in cookBook {
   if crystal.crystalElements.size != crystal.originalElements.size{
     writeln("*** entropy: ", crystal.entropy);
     const o = crystal.originalElements.sorted();
+    // Note degree(p) returns an array, should probably fix that.
+    const od = for p in o do subG.degree(p)(1);
+    var odo = for z in zip(o,od) do z;
+    writeln("\tcrystal.originalElements: ", odo);
+
     const e = crystal.crystalElements.sorted();
-    writeln("\tcrystal.originalElements: ", ", ".join(o));
-    writeln("\t crystal.crystalElements: ", ", ".join(e));
+    const ed = for p in e do subG.degree(p)(1);
+    var ede = for z in zip(e, ed) do z;
+    writeln("\t crystal.crystalElements: ", ede);
   }
 
 
