@@ -11,3 +11,6 @@ yummly: src/Yummly.chpl
 
 run:
 	./$(EXEC) --data=$(DATA_FILE) --e=$(DEGREE_ECDF) $(OPTS) --output=$(OUTPUT_FILE)
+
+lib: src/Yummly.chpl
+	$(CC) --library $(FLAGS) $(MODULES) $(INCLUDES) $(LIBS) -o $(EXEC) $< --savec cDir
