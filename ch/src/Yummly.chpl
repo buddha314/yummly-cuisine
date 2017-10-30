@@ -145,8 +145,9 @@ module Yummly {
     }
   }
 
-  export proc runYummly(datafile: string, outfile: string) {
-    const cookBook = loadTrainingData(datafile);
+  //export proc runYummly(datafile: string, outfile: string) {
+  export proc runYummly() {
+    const cookBook = loadTrainingData(data);
     const (G, ingredients, idToString, ingredientIds) = loadGraph(cookBook);
     const ecdf = new ECDF(G.degree());
 
@@ -177,7 +178,7 @@ module Yummly {
           crystal.crystalElements.push_back(subG.names(v));
         }
       }
-      if crystal.crystalElements.size != crystal.originalElements.size{
+      if crystal.crystalElements.size != crystal.originalElements.size && false {
         writeln("*** entropy: ", crystal.initialEntropy, " -> ", crystal.entropy, " (", crystal.initialEntropy-crystal.entropy, ")");
         const o = crystal.originalElements.sorted();
         // Note degree(p) returns an array, should probably fix that.
@@ -197,7 +198,8 @@ module Yummly {
     writeln("  ...time to build crystals: ", t2.elapsed());
 
     // Now write the results
-    var ofile = try!  open(outfile, iomode.cw).writer();
+    //var ofile = try!  open(outfile, iomode.cw).writer();
+    var ofile = try!  open(output, iomode.cw).writer();
     try! ofile.write("recipe_id\tinitial_entropy\tentropy\toriginal_elements\tcrystal_element\n");
     // Do something...?
     for crystal in crystals {
@@ -210,6 +212,11 @@ module Yummly {
     }
     try! ofile.close();
 
+  }
+  
+  proc main(args: [] string) {
+    writeln("in main");
+    runYummly();
   }
 
 }

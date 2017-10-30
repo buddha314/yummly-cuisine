@@ -1,0 +1,1 @@
+-M../src -M/Users/buddha/github/buddha314/numsuch/src -L/usr/local/Cellar/openblas/0.2.20/lib -lblas -I/usr/local/Cellar/openblas/0.2.20/include
