@@ -37,7 +37,6 @@ module Yummly {
     return recipeArray;
   }
 
-  //proc loadGraph(cookBook: CookBook) {
   proc loadGraph(recipeArray: []) {
       var idToString : [1..0] string,
           vertices: domain(1)= {1..0},
@@ -61,45 +60,21 @@ module Yummly {
             const ID = vertices.size;
             ingredients[ID] = ingredient_1;
 
-
-            //ingredients.add(ingredient_1);
-            //ingDom.add(ingredient_1);
-            //const ID = ingredientIds.last+1;
-            //ingredientIds[ingredient_1] = ID;
-            //idToString.push_back(ingredient_1);
-            //const ID = idToString.domain.last;
-            //ingredients[ingredient_1] = ID;
           }
           for ingredient_2 in recipe.ingredients {
-            //if ingDom.member(ingredient_2) == false {
-            //if ingredients.member(ingredient_2) == false {
+
             if ingredients.find(ingredient_2)(1) == false {
               vertices = {1..vertices.size+1};
               const ID = vertices.size;
               ingredients[ID] = (ingredient_2);
 
-              //const ID = ingredientIds.last+1;
-              //ingDom.add(ingredient_2);
-              //ingredientIds[ingredient_2] = ID;
-              //idToString.push_back(ingredient_2);
-
-              /*
-              const ID = idToString.domain.last;
-              ingDom.add(ingredient_2);
-              ingredients[ingredient_2] = ID;
-               */
             }
 
             var (i,j) = (ingredients.find(ingredient_1)(2), ingredients.find(ingredient_2)(2));
             if i != j {
               edges.append((i,j));
             }
-            /*
-            if ingredientIds[ingredient_1] != ingredientIds[ingredient_2] {
-              //edges.append((ingredientIds[ingredient_1], ingredientIds[ingredient_2]));
-              edges.append((ingredientsfind(ingredient_1)(2), ingredientsfind(ingredient_2)(2));
-            }
-            */
+
           }
         }
       }
@@ -180,8 +155,6 @@ module Yummly {
     const (subG, vertMap) = G.subgraph(vs);
     writeln("Original size: ", G.vs().size, "  vs.size: ", subG.vs().size);
 
-    var ofile = try!  open(outfile, iomode.cw).writer();
-    try! ofile.write("recipe_id\toriginal_size\tknockout_size\tcrystal_energy\tcrystal_size\n");
 
     var t2: Timer;
     t2.start();
@@ -218,13 +191,25 @@ module Yummly {
         writeln("\t crystal.crystalElements: ", ede);
         writeln();
       }
-
-
       crystals.push_back(crystal);
     }
-    try! ofile.close();
     t2.stop();
     writeln("  ...time to build crystals: ", t2.elapsed());
+
+    // Now write the results
+    var ofile = try!  open(outfile, iomode.cw).writer();
+    try! ofile.write("recipe_id\tinitial_entropy\tentropy\toriginal_elements\tcrystal_element\n");
+    // Do something...?
+    for crystal in crystals {
+      try! ofile.write(crystal.id, "\t",
+        crystal.initialEntropy, "\t",
+        crystal.entropy, "\t",
+        ":".join(crystal.originalElements), "\t",
+        ":".join(crystal.crystalElements), "\n"
+      );
+    }
+    try! ofile.close();
+
   }
 
 }

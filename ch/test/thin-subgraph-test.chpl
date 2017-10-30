@@ -35,6 +35,7 @@ forall recipe in cookBook {
   for ing in crystal.originalElements do
     tdom += subG.names().find(ing)(2);
   if crystal.originalElements.size > 0 {
+    crystal.initialEntropy = GraphEntropy.subgraphEntropy(subG, tdom);
     var (entropy, minDom) = GraphEntropy.minimalSubGraph(subG, tdom);
     crystal.entropy = entropy;
 
@@ -43,7 +44,7 @@ forall recipe in cookBook {
     }
   }
   if crystal.crystalElements.size != crystal.originalElements.size{
-    writeln("*** entropy: ", crystal.entropy);
+    writeln("*** entropy: ", crystal.initialEntropy, " -> ", crystal.entropy, " (", crystal.initialEntropy-crystal.entropy, ")");
     const o = crystal.originalElements.sorted();
     // Note degree(p) returns an array, should probably fix that.
     const od = for p in o do subG.degree(p)(1);
@@ -54,6 +55,7 @@ forall recipe in cookBook {
     const ed = for p in e do subG.degree(p)(1);
     var ede = for z in zip(e, ed) do z;
     writeln("\t crystal.crystalElements: ", ede);
+    writeln();
   }
 
 
