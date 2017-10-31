@@ -192,7 +192,8 @@ module Yummly {
         writeln("\t crystal.crystalElements: ", ede);
         writeln();
       }
-      crystal.id = crystals.size+1;
+      //crystal.id = crystals.size+1;
+      crystal.id = recipe.id;
       crystals.push_back(crystal);
     }
     t2.stop();
