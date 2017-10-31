@@ -1,3 +1,4 @@
 include Makefile.macbuddha
 DATA_FILE=test/data/train.small.json
 OUTPUT_FILE=crystals_dev.txt
+INFLATION_FILE=inflation_dev.txt

@@ -28,3 +28,10 @@ SELECT
 FROM r.yummly_crystals_raw
 ;
 
+DROP TABLE IF EXISTS r.yummly_inflation;
+CREATE TABLE r.yummly_inflation (
+  recipe_id int
+, crystal_id int
+, entropy real
+, inflation real
+);

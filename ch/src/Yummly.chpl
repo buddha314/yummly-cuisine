@@ -6,6 +6,7 @@ module Yummly {
   use NumSuch;
 
   config const output: string = "output.txt";
+  config const inflations: string = "inflation.txt";
   config const data: string;
   config const p: real = 0.95; // random knockout probability
   config const e: real = 0.95; // degrees of ecdf > e get ignored
@@ -163,7 +164,12 @@ module Yummly {
     return true;
   }
 
-  proc crystalRecipeFit(G, cookBook, crystals) {
+  proc crystalRecipePredict(G, cookBook, crystals) {
+    var inflatafile = try! open(inflations, iomode.cw).writer();
+    try! inflatafile.write("recipe_id\t",
+    "crystal_id\t",
+    "recipe_energy\t",
+    "inflation\n");
     forall recipe in cookBook {
         var rdom: domain(string) = for i in recipe.ingredients do i;
         forall crystal in crystals {
@@ -175,11 +181,19 @@ module Yummly {
             for ing in rminus do
               tdom += G.names().find(ing)(2);
 
-            var e = GraphEntropy.subgraphEntropy(G, tdom);
-            writeln("...recipe complement ", rminus, " e=", e);
+            const e = GraphEntropy.subgraphEntropy(G, tdom);
+            const inflation = e-crystal.entropy;
+            try! inflatafile.write(
+                recipe.id, "\t",
+                crystal.id, "\t",
+                e, "\t",
+                inflation, "\n"
+              );
+            writeln("...recipe complement ", rminus, " e=", e, " inflation=", inflation);
           }
         }
     }
+    try! inflatafile.close();
     return true;
   }
 
@@ -199,7 +213,7 @@ module Yummly {
     if persistCrystals(crystals) {
       writeln("...crystals written to ", output);
     }
-    crystalRecipeFit(G, cookBook, crystals);
+    crystalRecipePredict(G, cookBook, crystals);
   }
 
   /*
