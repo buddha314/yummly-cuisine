@@ -19,7 +19,6 @@ module Yummly {
     var recipes: list(Recipe);
   }
 
-
   /*
   Takes a JSON file and loads it into an array of Recipes
    */
@@ -41,20 +40,14 @@ module Yummly {
       var idToString : [1..0] string,
           vertices: domain(1)= {1..0},
           ingDom : domain(string),
-          //ingredients : domain(string),
           ingredients : [vertices] string,
-          //ingredients : [ingDom] int,
           ingredientIds: [vertices] int,
           t:Timer,
           edges: list((int, int));
-
       t.start();
       writeln("loading graph");
-      //for recipe in cookBook.recipes {
       for recipe in recipeArray {
         for ingredient_1 in recipe.ingredients {
-          //if ingDom.member(ingredient_1) == false {
-          //if ingredients.member(ingredient_1) == false {
           if ingredients.find(ingredient_1)(1) == false {
             vertices = {1..vertices.size+1};
             const ID = vertices.size;
@@ -62,19 +55,15 @@ module Yummly {
 
           }
           for ingredient_2 in recipe.ingredients {
-
             if ingredients.find(ingredient_2)(1) == false {
               vertices = {1..vertices.size+1};
               const ID = vertices.size;
               ingredients[ID] = (ingredient_2);
-
             }
-
             var (i,j) = (ingredients.find(ingredient_1)(2), ingredients.find(ingredient_2)(2));
             if i != j {
               edges.append((i,j));
             }
-
           }
         }
       }
@@ -106,51 +95,7 @@ module Yummly {
       return cupdom;
   }
 
-  //proc run(cupboard: domain(string)) {
-  proc run() {
-    var cookBook = loadTrainingData(data);
-    const (G, ingredients, idToString) = loadGraph(cookBook);
-    const ecdf = new ECDF(G.degree());
-
-    var t2: Timer;
-    t2.start();
-    var ofile = try! open(output, iomode.cw).writer();
-    try! ofile.write("recipe_id\toriginal_size\tknockout_size\tcrystal_energy\tcrystal_size\n");
-    forall recipe in cookBook {
-      var cupboard: domain(string);
-      for ingredient in recipe.ingredients {
-          cupboard += ingredient;
-      }
-      var tdom = testIngredients(G, ingredients, idToString, cupboard);
-
-      write("recipe id: ", recipe.id, " original size: ", recipe.ingredients.size
-        , " knockout size: ", cupboard.size
-      );
-      if cupboard.size > 1 {
-        var msb = GraphEntropy.minimalSubGraph(G, tdom);
-        writeln(" crystal energy: ", msb[1]
-        , " crystal size: ", msb[2].size);
-        try! ofile.write(
-          recipe.id + "\t" + recipe.ingredients.size
-          + "\t" + cupboard.size
-          + "\t" + msb[1] + "\t" + msb[2].size + "\n");
-      } else {
-        writeln(" ...skipping...");
-      }
-    }
-    try! ofile.close();
-    t2.stop();
-    if v {
-      writeln("  ...time to build crystals: ", t2.elapsed());
-    }
-  }
-
-  //export proc runYummly(datafile: string, outfile: string) {
-  export proc runYummly() {
-    const cookBook = loadTrainingData(data);
-    const (G, ingredients, idToString, ingredientIds) = loadGraph(cookBook);
-    const ecdf = new ECDF(G.degree());
-
+  proc buildCrystals(G, cookBook, ingredients, idToString, ingredientIds, ecdf) {
     const p:real = 0.75;
     var vs: domain(int) = for v in G.vs() do if ecdf(G.degree(v)) <= p then v;
     const (subG, vertMap) = G.subgraph(vs);
@@ -192,18 +137,18 @@ module Yummly {
         writeln("\t crystal.crystalElements: ", ede);
         writeln();
       }
-      //crystal.id = crystals.size+1;
       crystal.id = recipe.id;
       crystals.push_back(crystal);
     }
     t2.stop();
     writeln("  ...time to build crystals: ", t2.elapsed());
+    return crystals;
+  }
 
+  proc persistCrystals(crystals) {
     // Now write the results
-    //var ofile = try!  open(outfile, iomode.cw).writer();
     var ofile = try!  open(output, iomode.cw).writer();
     try! ofile.write("recipe_id\tinitial_entropy\tentropy\toriginal_elements\tcrystal_element\n");
-    // Do something...?
     for crystal in crystals {
       try! ofile.write(crystal.id, "\t",
         crystal.initialEntropy, "\t",
@@ -213,12 +158,23 @@ module Yummly {
       );
     }
     try! ofile.close();
-
+    return true;
   }
-  
+
+  export proc run() {
+    const cookBook = loadTrainingData(data);
+    const (G, ingredients, idToString, ingredientIds) = loadGraph(cookBook);
+    const ecdf = new ECDF(G.degree());
+    const crystals = buildCrystals(G, cookBook, ingredients, idToString, ingredientIds, ecdf);
+    persistCrystals(crystals);
+  }
+
+  /*
+  Provided for command-line execution.  This is useful since start_test times out.
+   */
   proc main(args: [] string) {
     writeln("in main");
-    runYummly();
+    run();
   }
 
 }
