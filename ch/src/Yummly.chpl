@@ -95,12 +95,14 @@ module Yummly {
       return cupdom;
   }
 
-  proc buildCrystals(G, cookBook, ingredients, idToString, ingredientIds, ecdf) {
+  proc buildCrystals(G, cookBook, ingredients, idToString, ingredientIds, ecdf, subG, vertMap) {
+    /*
     const p:real = 0.75;
     var vs: domain(int) = for v in G.vs() do if ecdf(G.degree(v)) <= p then v;
     const (subG, vertMap) = G.subgraph(vs);
-    writeln("Original size: ", G.vs().size, "  vs.size: ", subG.vs().size);
 
+    writeln("Original size: ", G.vs().size, "  vs.size: ", subG.vs().size);
+    */
 
     var t2: Timer;
     t2.start();
@@ -161,12 +163,43 @@ module Yummly {
     return true;
   }
 
+  proc crystalRecipeFit(G, cookBook, crystals) {
+    forall recipe in cookBook {
+        var rdom: domain(string) = for i in recipe.ingredients do i;
+        forall crystal in crystals {
+          var cdom: domain(string) = for i in crystal.crystalElements do i;
+          var rminus = rdom - cdom;
+          if rminus.size !=  rdom.size {
+
+            var tdom: sparse subdomain(G.vertices);
+            for ing in rminus do
+              tdom += G.names().find(ing)(2);
+
+            var e = GraphEntropy.subgraphEntropy(G, tdom);
+            writeln("...recipe complement ", rminus, " e=", e);
+          }
+        }
+    }
+    return true;
+  }
+
   export proc run() {
     const cookBook = loadTrainingData(data);
     const (G, ingredients, idToString, ingredientIds) = loadGraph(cookBook);
     const ecdf = new ECDF(G.degree());
-    const crystals = buildCrystals(G, cookBook, ingredients, idToString, ingredientIds, ecdf);
-    persistCrystals(crystals);
+
+    const p:real = 0.75;
+    var vs: domain(int) = for v in G.vs() do if ecdf(G.degree(v)) <= p then v;
+    const (subG, vertMap) = G.subgraph(vs);
+
+    writeln("Original size: ", G.vs().size, "  vs.size: ", subG.vs().size);
+
+    const crystals = buildCrystals(G, cookBook, ingredients, idToString
+      , ingredientIds, ecdf, subG, vertMap);
+    if persistCrystals(crystals) {
+      writeln("...crystals written to ", output);
+    }
+    crystalRecipeFit(G, cookBook, crystals);
   }
 
   /*
