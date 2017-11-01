@@ -1,0 +1,6 @@
+include Makefile.dev
+NUMSUCH_HOME=/Users/buddha/github/buddha314/numsuch/src
+BLAS_HOME= /usr/local/Cellar/openblas/0.2.20
+DATA_FILE=test/data/train.small.json
+OUTPUT_FILE=crystals_dev.txt
+INFLATION_FILE=inflation_dev.txt

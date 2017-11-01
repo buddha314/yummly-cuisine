@@ -2,6 +2,7 @@ module Yummly {
   use IO,
       LayoutCS,
       Random,
+      Memory,
       Time;
   use NumSuch;
 
@@ -216,6 +217,8 @@ module Yummly {
       writeln("...crystals written to ", output);
     }
     crystalRecipePredict(G, cookBook, crystals);
+    delete ecdf;
+    for c in crystals do delete c;
   }
 
   /*
@@ -223,7 +226,9 @@ module Yummly {
    */
   proc main(args: [] string) {
     writeln("in main");
-    run();
+    serial {
+      run();
+    }
   }
 
 }

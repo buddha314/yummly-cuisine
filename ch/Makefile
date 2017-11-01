@@ -11,7 +11,7 @@ yummly: src/Yummly.chpl
 
 run:
 	date
-	./$(EXEC) --data=$(DATA_FILE) $(OPTS) --output=$(OUTPUT_FILE) --inflations=$(INFLATION_FILE)
+	./$(EXEC) $(EXECFLAGS) --data=$(DATA_FILE) $(OPTS) --output=$(OUTPUT_FILE) --inflations=$(INFLATION_FILE)
 	date
 
 lib: src/Yummly.chpl
