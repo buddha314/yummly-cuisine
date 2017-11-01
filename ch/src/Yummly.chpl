@@ -165,6 +165,7 @@ module Yummly {
   }
 
   proc crystalRecipePredict(G, cookBook, crystals) {
+    writeln("...beginning prediction method");
     var inflatafile = try! open(inflations, iomode.cw).writer();
     try! inflatafile.write("recipe_id\t",
     "crystal_id\t",
@@ -189,10 +190,11 @@ module Yummly {
                 e, "\t",
                 inflation, "\n"
               );
-            writeln("...recipe complement ", rminus, " e=", e, " inflation=", inflation);
+            //writeln("...recipe complement ", rminus, " e=", e, " inflation=", inflation);
           }
         }
     }
+    writeln("...closing inflatafile");
     try! inflatafile.close();
     return true;
   }

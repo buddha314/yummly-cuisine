@@ -10,7 +10,9 @@ yummly: src/Yummly.chpl
 	$(CC) $(FLAGS) $(MODULES) $(INCLUDES) $(LIBS) -o $(EXEC) $<
 
 run:
+	date
 	./$(EXEC) --data=$(DATA_FILE) $(OPTS) --output=$(OUTPUT_FILE) --inflations=$(INFLATION_FILE)
+	date
 
 lib: src/Yummly.chpl
 	$(CC) --library $(FLAGS) $(MODULES) $(INCLUDES) $(LIBS) -o $(EXEC) $< --savec cDir
