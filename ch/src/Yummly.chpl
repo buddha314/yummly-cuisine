@@ -176,7 +176,11 @@ module Yummly {
         var rdom: domain(string) = for i in recipe.ingredients do i;
         forall crystal in crystals {
           var cdom: domain(string) = for i in crystal.crystalElements do i;
-          var rminus = rdom - cdom;
+          // BHarsh seems to think this is inefficient
+          //var rminus = rdom - cdom;
+          var rminus: domain(string);
+          for el in rdom do
+            if !cdom.member(el) then rminus.add(el);
           if rminus.size !=  rdom.size {
 
             var tdom: sparse subdomain(G.vertices);
@@ -217,6 +221,8 @@ module Yummly {
       writeln("...crystals written to ", output);
     }
     crystalRecipePredict(G, cookBook, crystals);
+    delete G;
+    delete subG;
     delete ecdf;
     for c in crystals do delete c;
   }
