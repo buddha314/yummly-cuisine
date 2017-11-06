@@ -165,6 +165,11 @@ module Yummly {
     return true;
   }
 
+  proc recipeCrystalDiff(rdom: domain(string), c: Crystal) {
+    var cdom: domain(string) = for i in c.crystalElements do i;
+    return rdom - cdom;
+  }
+
   proc crystalRecipePredict(G, cookBook, crystals) {
     writeln("...beginning prediction method");
     var inflatafile = try! open(inflations, iomode.cw).writer();
@@ -175,8 +180,9 @@ module Yummly {
     forall recipe in cookBook {
         var rdom: domain(string) = for i in recipe.ingredients do i;
         forall crystal in crystals {
-          var cdom: domain(string) = for i in crystal.crystalElements do i;
-          var rminus = rdom - cdom;
+          //var cdom: domain(string) = for i in crystal.crystalElements do i;
+          //var rminus = rdom - cdom;
+          var rminus = recipeCrystalDiff(rdom, crystal);
           if rminus.size !=  rdom.size {
 
             var tdom: sparse subdomain(G.vertices);
@@ -226,9 +232,7 @@ module Yummly {
    */
   proc main(args: [] string) {
     writeln("in main");
-    serial {
-      run();
-    }
+    run();
   }
 
 }
