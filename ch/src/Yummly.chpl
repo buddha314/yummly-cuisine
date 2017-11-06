@@ -165,6 +165,11 @@ module Yummly {
     return true;
   }
 
+  proc recipeCrystalDiff(rdom: domain(string), c: Crystal) {
+    var cdom: domain(string) = for i in c.crystalElements do i;
+    return rdom - cdom;
+  }
+
   proc crystalRecipePredict(G, cookBook, crystals) {
     writeln("...beginning prediction method");
     var inflatafile = try! open(inflations, iomode.cw).writer();
@@ -232,9 +237,7 @@ module Yummly {
    */
   proc main(args: [] string) {
     writeln("in main");
-    serial {
-      run();
-    }
+    run();
   }
 
 }
