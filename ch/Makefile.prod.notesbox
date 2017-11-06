@@ -1,0 +1,7 @@
+include Makefile.prod
+NUMSUCH_HOME=/home/buddha314/numsuch/src
+DATA_FILE=/home/buddha314/datasets/yummly/train.json
+BLAS_HOME= /opt/OpenBlas
+OUTPUT_FILE=output.txt
+INFLATION_FILE=inflation.txt
+FLAGS=--fast

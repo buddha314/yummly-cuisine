@@ -1,4 +1,6 @@
-include Makefile.notesbox
+include Makefile.dev
+NUMSUCH_HOME=/home/buddha314/numsuch/src
+BLAS_HOME= /opt/OpenBlas
 DATA_FILE=test/data/train.small.json
 OUTPUT_FILE=output.txt
 INFLATION_FILE=inflations.txt

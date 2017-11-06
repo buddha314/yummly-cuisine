@@ -36,7 +36,7 @@ CREATE TABLE r.yummly_inflation (
 , inflation real
 );
 
-// \copy r.yummly_inflation from 'inflations_20171102.txt' with csv header delimiter E'\t'
+// \copy r.yummly_inflation from 'inflations_20171106.txt' with csv header delimiter E'\t'
 
 DROP TABLE IF EXISTS r.yummly_crystal_fits;
 CREATE TABLE r.yummly_crystal_fits AS
