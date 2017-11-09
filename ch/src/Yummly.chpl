@@ -184,12 +184,22 @@ module Yummly {
           // BHarsh seems to think this is inefficient
           //var rminus = rdom - cdom;
           var rminus: domain(string);
+          var symdiff: domain(string);
+          for el in rdom do
+             if !cdom.member(el) then symdiff.add(el);
+          for el in cdom do
+             if !rdom.member(el) then symdiff.add(el);
+
+          /*
+          // Just the complement of rdom
           for el in rdom do
             if !cdom.member(el) then rminus.add(el);
           if rminus.size !=  rdom.size {
-
+          */
+          if symdiff.size > 0 {
             var tdom: sparse subdomain(G.vertices);
-            for ing in rminus do
+            //for ing in rminus do
+            for ing in symdiff do
               tdom += G.names().find(ing)(2);
 
             const e = GraphEntropy.subgraphEntropy(G, tdom);
