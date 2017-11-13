@@ -34,6 +34,7 @@ CREATE TABLE r.yummly_inflation (
 , crystal_id int
 , entropy real
 , inflation real
+, symdiff_size int
 );
 
 // \copy r.yummly_inflation from 'inflations_20171106.txt' with csv header delimiter E'\t'
@@ -50,7 +51,7 @@ FROM (
     FROM r.yummly_inflation
     GROUP BY crystal_id
     ) AS a
-  INNER JOIN r.yummly_inflation AS i 
+  INNER JOIN r.yummly_inflation AS i
     ON  a.crystal_id = i.crystal_id
     AND a.minflation = i.entropy - i.inflation
 ;

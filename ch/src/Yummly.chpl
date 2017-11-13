@@ -208,9 +208,20 @@ module Yummly {
                 recipe.id, "\t",
                 crystal.id, "\t",
                 e, "\t",
-                inflation, "\n"
+                inflation, "\t",
+                symdiff.size, "\n"
               );
             //writeln("...recipe complement ", rminus, " e=", e, " inflation=", inflation);
+          } else {
+            try! {
+              inflatafile.write(
+                recipe.id, "\t",
+                crystal.id, "\t",
+                e, "\t",
+                e, "\t",
+                symdiff.size, "\n"
+                );
+            }
           }
         }
     }
