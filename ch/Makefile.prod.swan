@@ -1,0 +1,8 @@
+include Makefile.prod
+NUMSUCH_HOME=/lus/scratch/p02424/numsuch/src
+DATA_FILE=/lus/scratch/p02424/data/train.json
+BLAS_HOME= /opt/OpenBlas
+OUTPUT_FILE=output.txt
+INFLATION_FILE=inflation.txt
+FLAGS=--fast
+EXECFLAGS=-nl 1 --walltime 3:00:00
