@@ -3,11 +3,13 @@ MODULES=-M${NUMSUCH_HOME}
 INCLUDES=-I$(BLAS_HOME)/include
 LIBS=-L${BLAS_HOME}/lib -lblas
 EXEC=yummly
+EXECFLAGS=
 DEGREE_ECDF=0.75
 default: yummly
 
 yummly: src/Yummly.chpl
-	$(CC) $(FLAGS) $(MODULES) $(INCLUDES) $(LIBS) -o $(EXEC) $<
+	#$(CC) $(FLAGS) $(MODULES) $(INCLUDES) $(LIBS) -o $(EXEC) $<
+	$(CC) $(FLAGS) $(MODULES) -o $(EXEC) $<
 
 run:
 	date
