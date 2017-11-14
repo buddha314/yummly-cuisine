@@ -1,0 +1,7 @@
+include Makefile.dev
+NUMSUCH_HOME=/lus/scratch/p02424/numsuch/src
+#BLAS_HOME= /usr/local/Cellar/openblas/0.2.20
+DATA_FILE=test/data/train.small.json
+OUTPUT_FILE=crystals_swan.txt
+INFLATION_FILE=inflation_dev_swan.txt
+EXECFLAGS=-nl 1
