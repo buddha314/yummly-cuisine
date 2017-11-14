@@ -10,7 +10,7 @@ module Yummly {
   config const inflations: string = "inflation.txt";
   config const data: string;
   config const p: real = 0.95; // random knockout probability
-  config const e: real = 0.95; // degrees of ecdf > e get ignored
+  config const ecdf_threshold: real = 0.95; // degrees of ecdf > e get ignored
 
   record Recipe {
     var cuisine: string,
@@ -97,7 +97,7 @@ module Yummly {
       return cupdom;
   }
 
-  proc buildCrystals(G, cookBook, ingredients, idToString, ingredientIds, ecdf, subG, vertMap) {
+  proc buildCrystals(G, cookBook, ingredients, idToString, ingredientIds, ecdf_threshold, subG, vertMap) {
     /*
     const p:real = 0.75;
     var vs: domain(int) = for v in G.vs() do if ecdf(G.degree(v)) <= p then v;
@@ -152,14 +152,32 @@ module Yummly {
   proc persistCrystals(crystals) {
     // Now write the results
     var ofile = try!  open(output, iomode.cw).writer();
-    try! ofile.write("recipe_id\tinitial_entropy\tentropy\toriginal_elements\tcrystal_element\n");
+    try! ofile.write("recipe_id\tinitial_entropy\tentropy\telement\tstatus\n");
     for crystal in crystals {
-      try! ofile.write(crystal.id, "\t",
-        crystal.initialEntropy, "\t",
-        crystal.entropy, "\t",
-        ":".join(crystal.originalElements), "\t",
-        ":".join(crystal.crystalElements), "\n"
-      );
+      for oel in crystal.originalElements {
+        var status = "dropped";
+        if crystal.crystalElements.find(oel)[1] {
+          status = "retained";
+        }
+        try! ofile.write(crystal.id, "\t",
+          crystal.initialEntropy, "\t",
+          crystal.entropy, "\t",
+          oel, "\t",
+          status, "\n"
+          //":".join(crystal.originalElements), "\t",
+          //":".join(crystal.crystalElements), "\n"
+        );
+      }
+      for cel in crystal.crystalElements {
+        if !crystal.crystalElements.find(cel)[1] {
+          try! ofile.write(crystal.id, "\t",
+            crystal.initialEntropy, "\t",
+            crystal.entropy, "\t",
+            cel, "\t",
+            "added", "\n"
+          );
+        }
+      }
     }
     try! ofile.close();
     return true;
@@ -190,6 +208,10 @@ module Yummly {
           for el in cdom do
              if !rdom.member(el) then symdiff.add(el);
 
+          var insct: domain(string);
+          for el in cdom do
+             if rdom.member(el) then insct.add(el);
+
           /*
           // Just the complement of rdom
           for el in rdom do
@@ -208,9 +230,23 @@ module Yummly {
                 recipe.id, "\t",
                 crystal.id, "\t",
                 e, "\t",
-                inflation, "\n"
+                inflation, "\t",
+                insct.size, "\t",
+                symdiff.size, "\n"
               );
             //writeln("...recipe complement ", rminus, " e=", e, " inflation=", inflation);
+          } else {
+            const e = -1;
+            try! {
+              inflatafile.write(
+                recipe.id, "\t",
+                crystal.id, "\t",
+                e, "\t",
+                e, "\t",
+                insct.size, "\t",
+                symdiff.size, "\n"
+                );
+            }
           }
         }
     }
@@ -224,14 +260,14 @@ module Yummly {
     const (G, ingredients, idToString, ingredientIds) = loadGraph(cookBook);
     const ecdf = new ECDF(G.degree());
 
-    const p:real = 0.75;
-    var vs: domain(int) = for v in G.vs() do if ecdf(G.degree(v)) <= p then v;
+    //const p:real = 0.75;
+    var vs: domain(int) = for v in G.vs() do if ecdf(G.degree(v)) <= ecdf_threshold then v;
     const (subG, vertMap) = G.subgraph(vs);
 
     writeln("Original size: ", G.vs().size, "  vs.size: ", subG.vs().size);
 
     const crystals = buildCrystals(G, cookBook, ingredients, idToString
-      , ingredientIds, ecdf, subG, vertMap);
+      , ingredientIds, ecdf_threshold, subG, vertMap);
     if persistCrystals(crystals) {
       writeln("...crystals written to ", output);
     }
