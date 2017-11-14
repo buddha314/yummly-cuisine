@@ -218,7 +218,7 @@ module Yummly {
             if !cdom.member(el) then rminus.add(el);
           if rminus.size !=  rdom.size {
           */
-          if symdiff.size > 0 {
+          if symdiff.size > 0 && insct.size > 0 {
             var tdom: sparse subdomain(G.vertices);
             //for ing in rminus do
             for ing in symdiff do
