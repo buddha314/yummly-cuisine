@@ -190,7 +190,7 @@ module Yummly {
 
   proc crystalRecipePredict(G, cookBook, crystals) {
     writeln("\t...beginning prediction method");
-    var predT = Timer;
+    var predT : Timer;
     predT.start();
     var inflatafile = try! open(inflations, iomode.cw).writer();
     try! inflatafile.write("recipe_id\t",

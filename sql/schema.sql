@@ -38,11 +38,13 @@ SELECT
   crystal_id
 , recipe_id
 , symdiff_e
-, crystal_diff_e
-, recipe_diff_e
+, crystal_minus_e
+, recipe_minus_e
 , intersection_size
 , symdiff_size
-, DENSE_RANK() OVER (PARTITION BY crystal_id ORDER BY entropy-inflation) AS r
+, DENSE_RANK() OVER (PARTITION BY crystal_id ORDER BY symdiff_e) AS r_symdiff
+, DENSE_RANK() OVER (PARTITION BY crystal_id ORDER BY crystal_minus_e) AS r_cdiff
+, DENSE_RANK() OVER (PARTITION BY crystal_id ORDER BY recipe_minus_e) AS r_rdiff
 FROM r.yummly_inflation
 WHERE intersection_size > 0
 ;
