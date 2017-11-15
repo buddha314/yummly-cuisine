@@ -9,7 +9,7 @@ CREATE TABLE r.yummly_recipe (
 
 DROP TABLE IF EXISTS r.yummly_crystal;
 CREATE TABLE r.yummly_crystal (
-  id int
+  crystal_id int
 , original_entropy real
 , entropy real
 , ingredient text
@@ -18,28 +18,33 @@ CREATE TABLE r.yummly_crystal (
 // \copy r.yummly_crystal from 'crystals_dev.txt' with csv header delimiter E'\t'
 
 
-DROP TABLE IF EXISTS r.yummly_inflation;
+DROP TABLE IF EXISTS r.yummly_inflation CASCADE;
 CREATE TABLE r.yummly_inflation (
   recipe_id int
 , crystal_id int
-, entropy real
-, inflation real
+, symdiff_e real
+, crystal_minus_e real
+, recipe_minus_e real
 , intersection_size int
 , symdiff_size int
 );
 
-// \copy r.yummly_inflation from 'results/inflation_20171114.txt' with csv header delimiter E'\t'
+// \copy r.yummly_inflation from 'inflation_dev.txt' with csv header delimiter E'\t'
+
 
 DROP TABLE IF EXISTS r.yummly_rank;
 CREATE TABLE r.yummly_rank AS
 SELECT
   crystal_id
 , recipe_id
-, (entropy-inflation) AS err
+, symdiff_e
+, crystal_diff_e
+, recipe_diff_e
 , intersection_size
 , symdiff_size
 , DENSE_RANK() OVER (PARTITION BY crystal_id ORDER BY entropy-inflation) AS r
 FROM r.yummly_inflation
+WHERE intersection_size > 0
 ;
 
 DROP TABLE IF EXISTS r.yummly_rank_recipe;

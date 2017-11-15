@@ -8,8 +8,8 @@ ECDF_THRESHOLD=0.99
 default: yummly
 
 yummly: src/Yummly.chpl
-	#$(CC) $(FLAGS) $(MODULES) $(INCLUDES) $(LIBS) -o $(EXEC) $<
-	$(CC) $(FLAGS) $(MODULES) -o $(EXEC) $<
+	$(CC) $(FLAGS) $(MODULES) $(INCLUDES) $(LIBS) -o $(EXEC) $<
+	#$(CC) $(FLAGS) $(MODULES) -o $(EXEC) $<
 
 run:
 	date

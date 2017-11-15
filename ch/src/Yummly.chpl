@@ -47,7 +47,7 @@ module Yummly {
           t:Timer,
           edges: list((int, int));
       t.start();
-      writeln("loading graph");
+      writeln("\tloading graph");
       for recipe in recipeArray {
         for ingredient_1 in recipe.ingredients {
           if ingredients.find(ingredient_1)(1) == false {
@@ -83,7 +83,7 @@ module Yummly {
         }
       }
       t.stop();
-      writeln("...time to load matrix: ", t.elapsed());
+      writeln("\t...time to load matrix: ", t.elapsed());
       const g = GraphUtils.buildFromSparseMatrix(A, weighted=false
         , directed=false, names=ingredients);
       return (g, ingredients, idToString, ingredientIds);
@@ -145,7 +145,7 @@ module Yummly {
       crystals.push_back(crystal);
     }
     t2.stop();
-    writeln("  ...time to build crystals: ", t2.elapsed());
+    writeln("\t...time to build crystals: ", t2.elapsed());
     return crystals;
   }
 
@@ -189,19 +189,35 @@ module Yummly {
   }
 
   proc crystalRecipePredict(G, cookBook, crystals) {
-    writeln("...beginning prediction method");
+    writeln("\t...beginning prediction method");
+    var predT = Timer;
+    predT.start();
     var inflatafile = try! open(inflations, iomode.cw).writer();
     try! inflatafile.write("recipe_id\t",
     "crystal_id\t",
-    "recipe_energy\t",
-    "inflation\n");
+    "symdiffe\t",
+    "cminuse\t",
+    "rminuse\t",
+    "symidff_size\t",
+    "intersection_size\n"
+    );
     forall recipe in cookBook {
         var rdom: domain(string) = for i in recipe.ingredients do i;
         forall crystal in crystals {
           var cdom: domain(string) = for i in crystal.crystalElements do i;
           // BHarsh seems to think this is inefficient
           //var rminus = rdom - cdom;
-          var rminus: domain(string);
+
+          // Recipe \ Crystal
+          var rminus: sparse subdomain(G.vertices);
+          for el in rdom do
+             if !cdom.member(el) then rminus += G.names().find(el)(2);
+          // Crystal \ Recipe
+          var cminus: sparse subdomain(G.vertices);
+          for el in cdom do
+             if !rdom.member(el) then cminus += G.names().find(el)(2);
+
+
           var symdiff: domain(string);
           for el in rdom do
              if !cdom.member(el) then symdiff.add(el);
@@ -213,11 +229,11 @@ module Yummly {
              if rdom.member(el) then insct.add(el);
 
           /*
-          // Just the complement of rdom
-          for el in rdom do
-            if !cdom.member(el) then rminus.add(el);
-          if rminus.size !=  rdom.size {
+            Now we need
           */
+          const cminuse = GraphEntropy.subgraphEntropy(G, cminus);
+          const rminuse = GraphEntropy.subgraphEntropy(G, rminus);
+
           if symdiff.size > 0 && insct.size > 0 {
             var tdom: sparse subdomain(G.vertices);
             //for ing in rminus do
@@ -225,12 +241,12 @@ module Yummly {
               tdom += G.names().find(ing)(2);
 
             const e = GraphEntropy.subgraphEntropy(G, tdom);
-            const inflation = e-crystal.entropy;
             try! inflatafile.write(
                 recipe.id, "\t",
                 crystal.id, "\t",
                 e, "\t",
-                inflation, "\t",
+                cminuse, "\t",
+                rminuse, "\t",
                 insct.size, "\t",
                 symdiff.size, "\n"
               );
@@ -242,7 +258,8 @@ module Yummly {
                 recipe.id, "\t",
                 crystal.id, "\t",
                 e, "\t",
-                e, "\t",
+                cminuse, "\t",
+                rminuse, "\t",
                 insct.size, "\t",
                 symdiff.size, "\n"
                 );
@@ -250,8 +267,10 @@ module Yummly {
           }
         }
     }
-    writeln("...closing inflatafile");
+    writeln("\t...closing inflatafile");
     try! inflatafile.close();
+    predT.stop();
+    writeln("\t...time to do predictions: ", predT.elapsed());
     return true;
   }
 
@@ -269,7 +288,7 @@ module Yummly {
     const crystals = buildCrystals(G, cookBook, ingredients, idToString
       , ingredientIds, ecdf_threshold, subG, vertMap);
     if persistCrystals(crystals) {
-      writeln("...crystals written to ", output);
+      writeln("\tcrystals written to ", output);
     }
     crystalRecipePredict(G, cookBook, crystals);
     delete G;
@@ -282,7 +301,6 @@ module Yummly {
   Provided for command-line execution.  This is useful since start_test times out.
    */
   proc main(args: [] string) {
-    writeln("in main");
     run();
   }
 

@@ -5,3 +5,5 @@ DATA_FILE=test/data/train.small.json
 OUTPUT_FILE=crystals_swan.txt
 INFLATION_FILE=inflation_dev_swan.txt
 EXECFLAGS=-nl 1
+INCLUDES=
+LIBS=
