@@ -198,8 +198,9 @@ module Yummly {
     "symdiffe\t",
     "cminuse\t",
     "rminuse\t",
-    "symidff_size\t",
-    "intersection_size\n"
+    "symdiff_size\t",
+    "intersection_size\t",
+    "union_size\n"
     );
     forall recipe in cookBook {
         var rdom: domain(string) = for i in recipe.ingredients do i;
@@ -207,6 +208,14 @@ module Yummly {
           var cdom: domain(string) = for i in crystal.crystalElements do i;
           // BHarsh seems to think this is inefficient
           //var rminus = rdom - cdom;
+
+
+          // Union
+          var un: sparse subdomain(G.vertices);
+          for el in cdom do
+            un += G.names().find(el)(2);
+          for el in rdom do
+            un += G.names().find(el)(2);
 
           // Recipe \ Crystal
           var rminus: sparse subdomain(G.vertices);
@@ -248,7 +257,8 @@ module Yummly {
                 cminuse, "\t",
                 rminuse, "\t",
                 insct.size, "\t",
-                symdiff.size, "\n"
+                symdiff.size, "\t",
+                un.size, "\n"
               );
             //writeln("...recipe complement ", rminus, " e=", e, " inflation=", inflation);
           } else {
@@ -261,7 +271,8 @@ module Yummly {
                 cminuse, "\t",
                 rminuse, "\t",
                 insct.size, "\t",
-                symdiff.size, "\n"
+                symdiff.size, "\t",
+                un.size, "\n"
                 );
             }
           }

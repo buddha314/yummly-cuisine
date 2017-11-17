@@ -27,6 +27,7 @@ CREATE TABLE r.yummly_inflation (
 , recipe_minus_e real
 , intersection_size int
 , symdiff_size int
+, union_size int
 );
 
 // \copy r.yummly_inflation from 'inflation_dev.txt' with csv header delimiter E'\t'
@@ -42,20 +43,31 @@ SELECT
 , recipe_minus_e
 , intersection_size
 , symdiff_size
+, union_size
 , DENSE_RANK() OVER (PARTITION BY crystal_id ORDER BY symdiff_e) AS r_symdiff
 , DENSE_RANK() OVER (PARTITION BY crystal_id ORDER BY crystal_minus_e) AS r_cdiff
 , DENSE_RANK() OVER (PARTITION BY crystal_id ORDER BY recipe_minus_e) AS r_rdiff
+, DENSE_RANK() OVER (PARTITION BY crystal_id ORDER BY 1.0*intersection_size / union_size) AS r_jdiff
 FROM r.yummly_inflation
 WHERE intersection_size > 0
 ;
+
 
 DROP TABLE IF EXISTS r.yummly_rank_recipe;
 CREATE TABLE r.yummly_rank_recipe AS
 SELECT
   crystal_id
 , recipe_id
-, (entropy-inflation) AS err
+, symdiff_e
+, crystal_minus_e
+, recipe_minus_e
+, intersection_size
 , symdiff_size
-, DENSE_RANK() OVER (PARTITION BY recipe_id ORDER BY entropy-inflation) AS r
+, union_size
+, DENSE_RANK() OVER (PARTITION BY recipe_id ORDER BY symdiff_e) AS r_symdiff
+, DENSE_RANK() OVER (PARTITION BY recipe_id ORDER BY crystal_minus_e) AS r_cdiff
+, DENSE_RANK() OVER (PARTITION BY recipe_id ORDER BY recipe_minus_e) AS r_rdiff
+, DENSE_RANK() OVER (PARTITION BY recipe_id ORDER BY 1.0*intersection_size / union_size) AS r_jdiff
 FROM r.yummly_inflation
+WHERE intersection_size > 0
 ;
