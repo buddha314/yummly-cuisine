@@ -47,7 +47,7 @@ SELECT
 , DENSE_RANK() OVER (PARTITION BY crystal_id ORDER BY symdiff_e) AS r_symdiff
 , DENSE_RANK() OVER (PARTITION BY crystal_id ORDER BY crystal_minus_e) AS r_cdiff
 , DENSE_RANK() OVER (PARTITION BY crystal_id ORDER BY recipe_minus_e) AS r_rdiff
-, DENSE_RANK() OVER (PARTITION BY crystal_id ORDER BY 1.0*intersection_size / union_size) AS r_jdiff
+, DENSE_RANK() OVER (PARTITION BY crystal_id ORDER BY 1.0*intersection_size / union_size DESC) AS r_jdiff
 FROM r.yummly_inflation
 WHERE intersection_size > 0
 ;
@@ -67,7 +67,7 @@ SELECT
 , DENSE_RANK() OVER (PARTITION BY recipe_id ORDER BY symdiff_e) AS r_symdiff
 , DENSE_RANK() OVER (PARTITION BY recipe_id ORDER BY crystal_minus_e) AS r_cdiff
 , DENSE_RANK() OVER (PARTITION BY recipe_id ORDER BY recipe_minus_e) AS r_rdiff
-, DENSE_RANK() OVER (PARTITION BY recipe_id ORDER BY 1.0*intersection_size / union_size) AS r_jdiff
+, DENSE_RANK() OVER (PARTITION BY recipe_id ORDER BY 1.0*intersection_size / union_size DESC) AS r_jdiff
 FROM r.yummly_inflation
 WHERE intersection_size > 0
 ;
